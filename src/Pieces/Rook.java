@@ -21,7 +21,7 @@ public class Rook extends Piece {
     }
 
     @Override
-    public boolean isValidPath(int finalX, int finalY, Piece[][] board, boolean phantom, boolean IgnoreCheck) {
+    public boolean isValidPath(int finalX, int finalY, Piece[][] board, boolean phantom) {
         int direction = 0;
 
         if (finalX == x && finalY != y) { // vertical
@@ -33,9 +33,7 @@ public class Rook extends Piece {
         if (!canOrNo) {
             return canOrNo;
         }
-
         switch (direction) {
-
             case UP:
                 for (int i = (y - 1); i >= finalY; i--) {
                     if (this.player.getPlayerColor() == PlayerType.White) {
@@ -43,25 +41,22 @@ public class Rook extends Piece {
                             if (board[i][finalX].getPlayer().getPlayerColor() == PlayerType.White) {
                                 return false;
                             } else if (board[i][finalX].getPlayer().getPlayerColor() == PlayerType.Black) {
-                                MoveIsValid = (i == finalY);
+                                return i == finalY;
+
                             }
-                        } else {
-                            MoveIsValid = true;
                         }
                     } else if (this.player.getPlayerColor() == PlayerType.Black) {
                         if (board[i][finalX] != null) {
                             if (board[i][finalX].getPlayer().getPlayerColor() == PlayerType.Black) {
                                 return false;
                             } else if (board[i][finalX].getPlayer().getPlayerColor() == PlayerType.White) {
-                                MoveIsValid = (i == finalY);
+                                return i == finalY;
+
                             }
-                        } else {
-                            MoveIsValid = true;
                         }
                     }
                 }
                 break;
-
             case DOWN:
                 for (int i = (y + 1); i <= finalY; i++) {
                     if (this.player.getPlayerColor() == PlayerType.White) {
@@ -69,26 +64,23 @@ public class Rook extends Piece {
                             if (board[i][finalX].getPlayer().getPlayerColor() == PlayerType.White) {
                                 return false;
                             } else if (board[i][finalX].getPlayer().getPlayerColor() == PlayerType.Black) {
-                                MoveIsValid = (i == finalY);
+                                return i == finalY;
+
                             }
-                        } else {
-                            MoveIsValid = true;
                         }
                     } else if (this.player.getPlayerColor() == PlayerType.Black) {
                         if (board[i][finalX] != null) {
                             if (board[i][finalX].getPlayer().getPlayerColor() == PlayerType.Black) {
                                 return false;
                             } else if (board[i][finalX].getPlayer().getPlayerColor() == PlayerType.White) {
-                                MoveIsValid = (i == finalY);
+                                return i == finalY;
+
                             }
-                        } else {
-                            MoveIsValid = true;
                         }
                     }
-
                 }
-                break;
 
+                break;
             case RIGHT:
                 for (int i = (x + 1); i <= finalX; i++) {
                     if (this.player.getPlayerColor() == PlayerType.White) {
@@ -96,25 +88,23 @@ public class Rook extends Piece {
                             if (board[finalY][i].getPlayer().getPlayerColor() == PlayerType.White) {
                                 return false;
                             } else if (board[finalY][i].getPlayer().getPlayerColor() == PlayerType.Black) {
-                                MoveIsValid = (i == finalX);
+                                return i == finalX;
+
                             }
-                        } else {
-                            MoveIsValid = true;
                         }
                     } else if (this.player.getPlayerColor() == PlayerType.Black) {
                         if (board[finalY][i] != null) {
                             if (board[finalY][i].getPlayer().getPlayerColor() == PlayerType.Black) {
                                 return false;
                             } else if (board[finalY][i].getPlayer().getPlayerColor() == PlayerType.White) {
-                                MoveIsValid = (i == finalX);
+                                return i == finalX;
+
                             }
-                        } else {
-                            MoveIsValid = true;
                         }
                     }
                 }
-                break;
 
+                break;
             case LEFT:
                 for (int i = (x - 1); i >= finalX; i--) {
                     if (this.player.getPlayerColor() == PlayerType.White) {
@@ -122,33 +112,25 @@ public class Rook extends Piece {
                             if (board[finalY][i].getPlayer().getPlayerColor() == PlayerType.White) {
                                 return false;
                             } else if (board[finalY][i].getPlayer().getPlayerColor() == PlayerType.Black) {
-                                MoveIsValid = (i == finalX);
+                                return i == finalX;
+
                             }
-                        } else {
-                            MoveIsValid = true;
                         }
                     } else if (this.player.getPlayerColor() == PlayerType.Black) {
                         if (board[finalY][i] != null) {
                             if (board[finalY][i].getPlayer().getPlayerColor() == PlayerType.Black) {
                                 return false;
                             } else if (board[finalY][i].getPlayer().getPlayerColor() == PlayerType.White) {
-                                MoveIsValid = (i == finalX);
+                                return i == finalX;
+
                             }
-                        } else {
-                            MoveIsValid = true;
                         }
                     }
                 }
+
                 break;
         }
-        if (!IgnoreCheck) {
-            if (MoveIsValid) {
-                return IsMoveLegal(true, check);
-            } else {
-                return MoveIsValid;
-            }
-        }
-        return MoveIsValid;
+        return true;
     }
 
 }

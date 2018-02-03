@@ -16,10 +16,7 @@ public class Queen extends Piece {
     }
 
     @Override
-    public boolean isValidPath(int finalX, int finalY, Piece[][] board, boolean phantom, boolean IgnoreCheck) {
-
-        
-
+    public boolean isValidPath(int finalX, int finalY, Piece[][] board, boolean phantom) {
         int direction = 0;
         if (finalX == x && finalY != y) { // vertical
             direction = ((finalY - y) > 0) ? DOWN : UP;
@@ -42,7 +39,7 @@ public class Queen extends Piece {
         }
         if (!canOrNo) {
             return false;
-        }
+        } 
         switch (direction) {
             case UP:
                 for (int i = (y - 1); i >= finalY; i--) {
@@ -51,25 +48,21 @@ public class Queen extends Piece {
                             if (board[i][finalX].getPlayer().getPlayerColor() == PlayerType.White) {
                                 return false;
                             } else if (board[i][finalX].getPlayer().getPlayerColor() == PlayerType.Black) {
-                                MoveIsValid = ((i == finalY));
+                                return i == finalY; 
+
                             }
-                        } else {
-                            MoveIsValid = (true);
                         }
                     } else if (this.player.getPlayerColor() == PlayerType.Black) {
                         if (board[i][finalX] != null) {
                             if (board[i][finalX].getPlayer().getPlayerColor() == PlayerType.Black) {
                                 return false;
                             } else if (board[i][finalX].getPlayer().getPlayerColor() == PlayerType.White) {
-                                MoveIsValid = ((i == finalY));
-                            }
-                        } else {
-                            MoveIsValid = true;
-                        }
+                                return i == finalY; 
 
+                            }
+                        }
                     }
                 }
-
                 break;
             case DOWN:
                 for (int i = (y + 1); i <= finalY; i++) {
@@ -78,22 +71,21 @@ public class Queen extends Piece {
                             if (board[i][finalX].getPlayer().getPlayerColor() == PlayerType.White) {
                                 return false;
                             } else if (board[i][finalX].getPlayer().getPlayerColor() == PlayerType.Black) {
-                                MoveIsValid = ((i == finalY));
+                                return i == finalY; 
+
                             }
-                        } else {
-                            MoveIsValid = (true);
                         }
                     } else if (this.player.getPlayerColor() == PlayerType.Black) {
                         if (board[i][finalX] != null) {
                             if (board[i][finalX].getPlayer().getPlayerColor() == PlayerType.Black) {
                                 return false;
                             } else if (board[i][finalX].getPlayer().getPlayerColor() == PlayerType.White) {
-                                MoveIsValid = ((i == finalY));
+                                return i == finalY; 
+
                             }
-                        } else {
-                            MoveIsValid = true;
                         }
                     }
+
                 }
 
                 break;
@@ -104,17 +96,17 @@ public class Queen extends Piece {
                             if (board[finalY][i].getPlayer().getPlayerColor() == PlayerType.White) {
                                 return false;
                             } else if (board[finalY][i].getPlayer().getPlayerColor() == PlayerType.Black) {
-                                MoveIsValid = ((i == finalX));
+                                return i == finalX; 
+
                             }
-                        } else {
-                            MoveIsValid = true;
                         }
                     } else if (this.player.getPlayerColor() == PlayerType.Black) {
                         if (board[finalY][i] != null) {
                             if (board[finalY][i].getPlayer().getPlayerColor() == PlayerType.Black) {
                                 return false;
                             } else if (board[finalY][i].getPlayer().getPlayerColor() == PlayerType.White) {
-                                MoveIsValid = ((i == finalX));
+                                return i == finalX; 
+
                             }
                         }
                     }
@@ -128,146 +120,132 @@ public class Queen extends Piece {
                             if (board[finalY][i].getPlayer().getPlayerColor() == PlayerType.White) {
                                 return false;
                             } else if (board[finalY][i].getPlayer().getPlayerColor() == PlayerType.Black) {
-                                MoveIsValid = ((i == finalX));
+                                return i == finalX; 
+
                             }
-                        } else {
-                            MoveIsValid = true;
                         }
                     } else if (this.player.getPlayerColor() == PlayerType.Black) {
                         if (board[finalY][i] != null) {
                             if (board[finalY][i].getPlayer().getPlayerColor() == PlayerType.Black) {
                                 return false;
                             } else if (board[finalY][i].getPlayer().getPlayerColor() == PlayerType.White) {
-                                MoveIsValid = ((i == finalX));
+                                return i == finalX; 
+
                             }
-                        } else {
-                            MoveIsValid = true;
                         }
                     }
                 }
 
                 break;
             case UP_RIGHT:
-                for (int i = (y - 1); i >= finalY;) { //UP part
-                    for (int j = (x + 1); j <= finalX; j++, i--) { //RIGHT part
+                for (int i = (y - 1); i >= finalY;) { 
+                    for (int j = (x + 1); j <= finalX; j++, i--) { 
                         if (this.player.getPlayerColor() == PlayerType.White) {
                             if (board[i][j] != null) {
                                 if (board[i][j].getPlayer().getPlayerColor() == PlayerType.White) {
                                     return false;
                                 } else if (board[i][j].getPlayer().getPlayerColor() == PlayerType.Black) {
-                                    MoveIsValid = ((i == finalY && j == finalX));
+                                    return (i == finalY && j == finalX); 
+
                                 }
-                            } else {
-                                MoveIsValid = true;
                             }
                         } else if (this.player.getPlayerColor() == PlayerType.Black) {
                             if (board[i][j] != null) {
                                 if (board[i][j].getPlayer().getPlayerColor() == PlayerType.Black) {
                                     return false;
                                 } else if (board[i][j].getPlayer().getPlayerColor() == PlayerType.White) {
-                                    MoveIsValid = ((i == finalY && j == finalX));
+                                    return (i == finalY && j == finalX); 
+
                                 }
-                            } else {
-                                MoveIsValid = true;
                             }
                         }
+
                     }
                 }
-
                 break;
             case UP_LEFT:
-                for (int i = (y - 1); i >= finalY;) { //UP part
-                    for (int j = (x - 1); j >= finalX; j--, i--) { //LEFT part
+                for (int i = (y - 1); i >= finalY;) { 
+                    for (int j = (x - 1); j >= finalX; j--, i--) { 
                         if (this.player.getPlayerColor() == PlayerType.White) {
                             if (board[i][j] != null) {
                                 if (board[i][j].getPlayer().getPlayerColor() == PlayerType.White) {
                                     return false;
                                 } else if (board[i][j].getPlayer().getPlayerColor() == PlayerType.Black) {
-                                    MoveIsValid = ((i == finalY && j == finalX));
+                                    return (i == finalY && j == finalX); 
+
                                 }
-                            } else {
-                                MoveIsValid = true;
                             }
                         } else if (this.player.getPlayerColor() == PlayerType.Black) {
                             if (board[i][j] != null) {
                                 if (board[i][j].getPlayer().getPlayerColor() == PlayerType.Black) {
                                     return false;
                                 } else if (board[i][j].getPlayer().getPlayerColor() == PlayerType.White) {
-                                    MoveIsValid = ((i == finalY && j == finalX));
+                                    return (i == finalY && j == finalX); 
+
                                 }
-                            } else {
-                                MoveIsValid = true;
                             }
                         }
+
                     }
                 }
 
                 break;
             case DOWN_RIGHT:
-                for (int i = (y + 1); i <= finalY;) { //DOWN part
-                    for (int j = (x + 1); j <= finalX; j++, i++) { //RIGHT part
+                for (int i = (y + 1); i <= finalY;) { 
+                    for (int j = (x + 1); j <= finalX; j++, i++) { 
                         if (this.player.getPlayerColor() == PlayerType.White) {
                             if (board[i][j] != null) {
                                 if (board[i][j].getPlayer().getPlayerColor() == PlayerType.White) {
                                     return false;
                                 } else if (board[i][j].getPlayer().getPlayerColor() == PlayerType.Black) {
-                                    MoveIsValid = ((i == finalY && j == finalX));
+                                    return (i == finalY && j == finalX); 
+
                                 }
-                            } else {
-                                MoveIsValid = true;
                             }
                         } else if (this.player.getPlayerColor() == PlayerType.Black) {
                             if (board[i][j] != null) {
                                 if (board[i][j].getPlayer().getPlayerColor() == PlayerType.Black) {
                                     return false;
                                 } else if (board[i][j].getPlayer().getPlayerColor() == PlayerType.White) {
-                                    MoveIsValid = ((i == finalY && j == finalX));
+                                    return (i == finalY && j == finalX); 
+
                                 }
-                            } else {
-                                MoveIsValid = true;
                             }
                         }
+
                     }
                 }
 
                 break;
             case DOWN_LEFT:
-                for (int i = (y + 1); i <= finalY;) { //DOWN part
-                    for (int j = (x - 1); j >= finalX; j--, i++) { //LEFT part
+                for (int i = (y + 1); i <= finalY;) { 
+                    for (int j = (x - 1); j >= finalX; j--, i++) { 
                         if (this.player.getPlayerColor() == PlayerType.White) {
                             if (board[i][j] != null) {
                                 if (board[i][j].getPlayer().getPlayerColor() == PlayerType.White) {
                                     return false;
                                 } else if (board[i][j].getPlayer().getPlayerColor() == PlayerType.Black) {
-                                    MoveIsValid = ((i == finalY && j == finalX));
+                                    return (i == finalY && j == finalX); 
+
                                 }
-                            } else {
-                                MoveIsValid = true;
                             }
                         } else if (this.player.getPlayerColor() == PlayerType.Black) {
                             if (board[i][j] != null) {
                                 if (board[i][j].getPlayer().getPlayerColor() == PlayerType.Black) {
                                     return false;
                                 } else if (board[i][j].getPlayer().getPlayerColor() == PlayerType.White) {
-                                    MoveIsValid = ((i == finalY && j == finalX));
+                                    return (i == finalY && j == finalX); 
+
                                 }
-                            } else {
-                                MoveIsValid = true;
                             }
                         }
+
                     }
                 }
 
                 break;
         }
-        if (!IgnoreCheck) {
-            if (MoveIsValid) {
-                return IsMoveLegal(true, check);
-            } else {
-                return MoveIsValid;
-            }
-        }
-        return MoveIsValid;
+        return true;
     }
 
 }

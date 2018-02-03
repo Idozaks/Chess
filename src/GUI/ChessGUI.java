@@ -5,6 +5,7 @@ import Game.*;
 import Pieces.*;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Desktop;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -16,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Random;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JRadioButton;
@@ -74,13 +76,26 @@ public class ChessGUI extends javax.swing.JFrame {
     boolean[][] PiecePossibleTiles;
     boolean HistoryCheckBox;
 
-    public static boolean WhiteCheck, BlackCheck;
+    /**
+     * this boolean means that White is checked
+     */
+    public static boolean WhiteCheck;
+    /**
+     * this boolean means that Black is checked
+     */
+    public static boolean BlackCheck;
+
+    public int BlackSeconds = 0, BlackMinutes = 0, WhiteSeconds = 0, WhiteMinutes = 0;
 
     /**
      * Creates new form ChessGUI
      */
     public ChessGUI() {
         initComponents();
+
+        jFrameMainMenu.setSize(1069, 800);
+        jFrameMainMenu.setLocationRelativeTo(null);
+        jFrameMainMenu.setVisible(true);
 
         jLabelBlackClock.setVisible(false);
         jLabelWhiteClock.setVisible(false);
@@ -147,40 +162,28 @@ public class ChessGUI extends javax.swing.JFrame {
         //<editor-fold defaultstate="collapsed" desc="Player Timers declaration and implementation">
         BlackClock = new Timer(1000, new ActionListener() {
 
-            int seconds = 0, minutes = 0;
             DecimalFormat format = new DecimalFormat("00");
-
-            public void reset() {
-                seconds = 0;
-                minutes = 0;
-            }
 
             @Override
             public void actionPerformed(ActionEvent ae) {
-                seconds++;
-                if (seconds == 60) {
-                    minutes++;
+                BlackSeconds++;
+                if (BlackSeconds == 60) {
+                    BlackMinutes++;
                 }
-                jLabelBlackClock.setText(format.format(minutes) + ":" + format.format(seconds));
+                jLabelBlackClock.setText(format.format(BlackMinutes) + ":" + format.format(BlackSeconds));
             }
         });
         WhiteClock = new Timer(1000, new ActionListener() {
 
-            int seconds = 0, minutes = 0;
             DecimalFormat format = new DecimalFormat("00");
-
-            public void reset() {
-                seconds = 0;
-                minutes = 0;
-            }
 
             @Override
             public void actionPerformed(ActionEvent ae) {
-                seconds++;
-                if (seconds == 60) {
-                    minutes++;
+                WhiteSeconds++;
+                if (WhiteSeconds == 60) {
+                    WhiteMinutes++;
                 }
-                jLabelWhiteClock.setText(format.format(minutes) + ":" + format.format(seconds));
+                jLabelWhiteClock.setText(format.format(WhiteMinutes) + ":" + format.format(WhiteSeconds));
             }
         });
         //</editor-fold>
@@ -232,7 +235,7 @@ public class ChessGUI extends javax.swing.JFrame {
         if //<editor-fold defaultstate="collapsed" desc="(Tile with a piece in it)">
                 (board.gameBoard[iIndex][jIndex] != null) {
 
-            if //<editor-fold defaultstate="collapsed" desc="(same turn-color click)">
+            if //<editor-fold defaultstate="collapsed" desc="(same turn-color click = displays paths)">
                     (board.gameBoard[iIndex][jIndex].getPlayer().getPlayerColor().equals(turn)) {
                 focusedPiece = board.gameBoard[iIndex][jIndex].getPieceType(); //sets "focusedPiece" to the filled tile's piece.
                 focusedPieceX = jIndex;
@@ -240,10 +243,19 @@ public class ChessGUI extends javax.swing.JFrame {
                 PiecePossibleTiles = board.gameBoard[iIndex][jIndex].drawPath(board.gameBoard); //fills the moves-boolean-matrix
                 showAvailablePaths(PiecePossibleTiles); //displays the bool matrix on the GUI board in red.
             } //</editor-fold>
-            else if //<editor-fold defaultstate="collapsed" desc="(opposite turn-color click)">
+            else if //<editor-fold defaultstate="collapsed" desc="(opposite turn-color click = eating an enemy)">
                     (focusedPiece != null && PiecePossibleTiles[iIndex][jIndex] == true) {
                 boolean KingEaten = (board.gameBoard[iIndex][jIndex].getPieceType().equals(PieceType.King));
                 PlayerType DeadKingColor;
+
+                if (BlackCheck && board.gameBoard[focusedPieceY][focusedPieceX]
+                        .getPlayer().getPlayerColor() == PlayerType.Black) {
+                    Victory();
+                } else if (WhiteCheck && board.gameBoard[focusedPieceY][focusedPieceX]
+                        .getPlayer().getPlayerColor() == PlayerType.White) {
+                    Victory();
+                }
+
                 board.gameBoard[iIndex][jIndex] = null; //nullifies the clicked tile
                 board.gameBoard[iIndex][jIndex] = board.gameBoard[focusedPieceY][focusedPieceX]; //copies the focused tile over to the clicked tile
                 board.gameBoard[focusedPieceY][focusedPieceX].setLocation(jIndex, iIndex); //sets the instance piece's x & y fields to the selected tile location indexes.
@@ -270,6 +282,7 @@ public class ChessGUI extends javax.swing.JFrame {
                         drawBoard(board.gameBoard, i, j);
                     }
                 }
+
                 focusedPiece = null;
                 focusedPieceX = -1;
                 focusedPieceY = -1;
@@ -289,19 +302,13 @@ public class ChessGUI extends javax.swing.JFrame {
 
                 if (KingEaten) {
                     DeadKingColor = board.gameBoard[iIndex][jIndex].getPlayer().getPlayerColor();
-                    if (DeadKingColor.equals(PlayerType.White)) {
-                        Victory(PlayerType.White, "Victory!");
-                    } else {
-                        Victory(PlayerType.Black, "Victory!");
-                    }
+                    Victory();
                     jLabelTurnMarker.setVisible(false);
-                    {
-
-                    }
                 }
                 if (jFrameHistory.isVisible()) { //refresh history list
                     jButtonShowHistoryActionPerformed(null);
                 }
+
                 checkForCheckmate(board.gameBoard);
             }
             //</editor-fold>
@@ -313,6 +320,15 @@ public class ChessGUI extends javax.swing.JFrame {
 
                 if //<editor-fold defaultstate="collapsed" desc="( ) { moves a piece }">
                         (PiecePossibleTiles[iIndex][jIndex]) {
+
+                    if (BlackCheck && board.gameBoard[focusedPieceY][focusedPieceX]
+                            .getPlayer().getPlayerColor() == PlayerType.Black) {
+                        Victory();
+                    } else if (WhiteCheck && board.gameBoard[focusedPieceY][focusedPieceX]
+                            .getPlayer().getPlayerColor() == PlayerType.White) {
+                        Victory();
+                    }
+
                     board.gameBoard[iIndex][jIndex] = board.gameBoard[focusedPieceY][focusedPieceX];
                     board.gameBoard[focusedPieceY][focusedPieceX].setLocation(jIndex, iIndex);
                     board.gameBoard[focusedPieceY][focusedPieceX] = null;
@@ -357,8 +373,9 @@ public class ChessGUI extends javax.swing.JFrame {
                     if (jFrameHistory.isVisible()) { //refresh history list
                         jButtonShowHistoryActionPerformed(null);
                     }
-                    checkForCheckmate(board.gameBoard);
-
+                    if (!checkForCheckmate(board.gameBoard) && (BlackCheck || WhiteCheck)) {
+                        Victory();
+                    }
                 }
                 //</editor-fold>
 
@@ -369,14 +386,14 @@ public class ChessGUI extends javax.swing.JFrame {
         updateTurnMarker();
 
         {
-            if (BlackCheck) {
-                System.out.println("black check");
-            } else if (WhiteCheck) {
-                System.out.println("white Check");
+            if (!(colorSwap.isRunning() || trailingRed.isRunning())) {
+                if (BlackCheck) {
+                    jLabelCheck.setText("Black is checked!");
+                } else if (WhiteCheck) {
+                    jLabelCheck.setText("White is checked!");
+                }
             }
         }
-
-        Piece.check = (BlackCheck || WhiteCheck);
     }
 
     void LightUpTile(int x, int y) {
@@ -488,6 +505,15 @@ public class ChessGUI extends javax.swing.JFrame {
         jListHistory = new javax.swing.JList();
         jLabel2 = new javax.swing.JLabel();
         jButtonRestore = new javax.swing.JButton();
+        jFrameMainMenu = new javax.swing.JFrame();
+        jLayeredPane1 = new javax.swing.JLayeredPane();
+        jPanelBack = new javax.swing.JPanel();
+        jLabelBackground = new javax.swing.JLabel();
+        jPanelFore = new javax.swing.JPanel();
+        jCheckBoxHistory = new javax.swing.JCheckBox();
+        jButtonStart = new javax.swing.JButton();
+        jMenuBar = new javax.swing.JMenuBar();
+        jMenuAbout = new javax.swing.JMenu();
         jPanel1 = new javax.swing.JPanel();
         boardTile1 = new javax.swing.JLabel();
         boardTile2 = new javax.swing.JLabel();
@@ -553,13 +579,21 @@ public class ChessGUI extends javax.swing.JFrame {
         boardTile62 = new javax.swing.JLabel();
         boardTile63 = new javax.swing.JLabel();
         boardTile64 = new javax.swing.JLabel();
-        jLabelBlackClock = new javax.swing.JLabel();
         jButtonShowHistory = new javax.swing.JButton();
-        jLabelWhiteClock = new javax.swing.JLabel();
-        jLabelTurnMarker = new javax.swing.JLabel();
-        jButtonStart = new javax.swing.JButton();
-        jCheckBoxHistory = new javax.swing.JCheckBox();
         jLabelCheck = new javax.swing.JLabel();
+        jPanel3 = new javax.swing.JPanel();
+        jLabelBlackClock = new javax.swing.JLabel();
+        jSeparator1 = new javax.swing.JSeparator();
+        jLabelTurnMarker = new javax.swing.JLabel();
+        jSeparator2 = new javax.swing.JSeparator();
+        jLabelWhiteClock = new javax.swing.JLabel();
+        jMenuBarGame = new javax.swing.JMenuBar();
+        jMenu1 = new javax.swing.JMenu();
+        jMenuReturnToMenu = new javax.swing.JMenu();
+        jMenuResetGame = new javax.swing.JMenu();
+        jMenuHistoryOption = new javax.swing.JMenu();
+        jMenu2 = new javax.swing.JMenu();
+        jMenuAbout2 = new javax.swing.JMenu();
 
         jLabel1.setFont(new java.awt.Font("Tahoma", 2, 24)); // NOI18N
         jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
@@ -743,7 +777,108 @@ public class ChessGUI extends javax.swing.JFrame {
                 .addGap(17, 17, 17))
         );
 
+        jFrameMainMenu.setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        jFrameMainMenu.setResizable(false);
+
+        jLabelBackground.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabelBackground.setIcon(new javax.swing.ImageIcon(getClass().getResource("/OtherImages/chess.png"))); // NOI18N
+
+        jCheckBoxHistory.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        jCheckBoxHistory.setText("Enable History?");
+        jCheckBoxHistory.setToolTipText("If checked, allows to see previous moves and restore them.");
+        jCheckBoxHistory.setFocusable(false);
+        jCheckBoxHistory.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jCheckBoxHistoryActionPerformed(evt);
+            }
+        });
+
+        jButtonStart.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        jButtonStart.setText("Start");
+        jButtonStart.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        jButtonStart.setFocusable(false);
+        jButtonStart.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonStartActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanelForeLayout = new javax.swing.GroupLayout(jPanelFore);
+        jPanelFore.setLayout(jPanelForeLayout);
+        jPanelForeLayout.setHorizontalGroup(
+            jPanelForeLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanelForeLayout.createSequentialGroup()
+                .addGap(416, 416, 416)
+                .addComponent(jButtonStart, javax.swing.GroupLayout.PREFERRED_SIZE, 220, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(jCheckBoxHistory, javax.swing.GroupLayout.PREFERRED_SIZE, 132, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        jPanelForeLayout.setVerticalGroup(
+            jPanelForeLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanelForeLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanelForeLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jButtonStart, javax.swing.GroupLayout.PREFERRED_SIZE, 82, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jCheckBoxHistory, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(90, Short.MAX_VALUE))
+        );
+
+        javax.swing.GroupLayout jPanelBackLayout = new javax.swing.GroupLayout(jPanelBack);
+        jPanelBack.setLayout(jPanelBackLayout);
+        jPanelBackLayout.setHorizontalGroup(
+            jPanelBackLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanelBackLayout.createSequentialGroup()
+                .addGap(54, 54, 54)
+                .addComponent(jLabelBackground, javax.swing.GroupLayout.DEFAULT_SIZE, 1015, Short.MAX_VALUE))
+            .addComponent(jPanelFore, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+        jPanelBackLayout.setVerticalGroup(
+            jPanelBackLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanelBackLayout.createSequentialGroup()
+                .addComponent(jLabelBackground, javax.swing.GroupLayout.PREFERRED_SIZE, 506, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jPanelFore, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+        );
+
+        javax.swing.GroupLayout jLayeredPane1Layout = new javax.swing.GroupLayout(jLayeredPane1);
+        jLayeredPane1.setLayout(jLayeredPane1Layout);
+        jLayeredPane1Layout.setHorizontalGroup(
+            jLayeredPane1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jPanelBack, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+        jLayeredPane1Layout.setVerticalGroup(
+            jLayeredPane1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jLayeredPane1Layout.createSequentialGroup()
+                .addGap(0, 0, 0)
+                .addComponent(jPanelBack, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        jLayeredPane1.setLayer(jPanelBack, javax.swing.JLayeredPane.DEFAULT_LAYER);
+
+        jMenuAbout.setText("About");
+        jMenuAbout.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        jMenuAbout.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jMenuAboutMouseClicked(evt);
+            }
+        });
+        jMenuBar.add(jMenuAbout);
+
+        jFrameMainMenu.setJMenuBar(jMenuBar);
+
+        javax.swing.GroupLayout jFrameMainMenuLayout = new javax.swing.GroupLayout(jFrameMainMenu.getContentPane());
+        jFrameMainMenu.getContentPane().setLayout(jFrameMainMenuLayout);
+        jFrameMainMenuLayout.setHorizontalGroup(
+            jFrameMainMenuLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jLayeredPane1)
+        );
+        jFrameMainMenuLayout.setVerticalGroup(
+            jFrameMainMenuLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jLayeredPane1)
+        );
+
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setResizable(false);
 
         jPanel1.setLayout(new java.awt.GridLayout(8, 8));
 
@@ -1068,12 +1203,7 @@ public class ChessGUI extends javax.swing.JFrame {
         boardTile64.setOpaque(true);
         jPanel1.add(boardTile64);
 
-        jLabelBlackClock.setBackground(new java.awt.Color(0, 0, 0));
-        jLabelBlackClock.setFont(new java.awt.Font("Tahoma", 1, 24)); // NOI18N
-        jLabelBlackClock.setForeground(new java.awt.Color(255, 255, 255));
-        jLabelBlackClock.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabelBlackClock.setOpaque(true);
-
+        jButtonShowHistory.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
         jButtonShowHistory.setText("Show History");
         jButtonShowHistory.setFocusable(false);
         jButtonShowHistory.addActionListener(new java.awt.event.ActionListener() {
@@ -1082,82 +1212,140 @@ public class ChessGUI extends javax.swing.JFrame {
             }
         });
 
-        jLabelWhiteClock.setBackground(new java.awt.Color(255, 255, 255));
-        jLabelWhiteClock.setFont(new java.awt.Font("Tahoma", 1, 24)); // NOI18N
-        jLabelWhiteClock.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabelWhiteClock.setOpaque(true);
+        jLabelCheck.setFont(new java.awt.Font("Tahoma", 1, 18)); // NOI18N
+        jLabelCheck.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabelCheck.setAutoscrolls(true);
+
+        jPanel3.setLayout(new java.awt.GridLayout(5, 0));
+
+        jLabelBlackClock.setBackground(new java.awt.Color(0, 0, 0));
+        jLabelBlackClock.setFont(new java.awt.Font("Tahoma", 1, 24)); // NOI18N
+        jLabelBlackClock.setForeground(new java.awt.Color(255, 255, 255));
+        jLabelBlackClock.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabelBlackClock.setOpaque(true);
+        jPanel3.add(jLabelBlackClock);
+        jPanel3.add(jSeparator1);
 
         jLabelTurnMarker.setBackground(new java.awt.Color(255, 255, 255));
         jLabelTurnMarker.setFont(new java.awt.Font("Tahoma", 1, 24)); // NOI18N
         jLabelTurnMarker.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabelTurnMarker.setText("White Turn");
         jLabelTurnMarker.setOpaque(true);
+        jPanel3.add(jLabelTurnMarker);
+        jPanel3.add(jSeparator2);
 
-        jButtonStart.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
-        jButtonStart.setText("Start");
-        jButtonStart.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButtonStartActionPerformed(evt);
+        jLabelWhiteClock.setBackground(new java.awt.Color(255, 255, 255));
+        jLabelWhiteClock.setFont(new java.awt.Font("Tahoma", 1, 24)); // NOI18N
+        jLabelWhiteClock.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabelWhiteClock.setOpaque(true);
+        jPanel3.add(jLabelWhiteClock);
+
+        jMenu1.setText("Options");
+        jMenu1.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        jMenu1.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                jMenu1MouseEntered(evt);
             }
         });
 
-        jCheckBoxHistory.setText("Enable History?");
-        jCheckBoxHistory.setToolTipText("If checked, allows to see previous moves and restore them.");
-        jCheckBoxHistory.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jCheckBoxHistoryActionPerformed(evt);
+        jMenuReturnToMenu.setIcon(new javax.swing.ImageIcon(getClass().getResource("/OtherImages/back.png"))); // NOI18N
+        jMenuReturnToMenu.setText("Return to Menu");
+        jMenuReturnToMenu.setFocusable(false);
+        jMenuReturnToMenu.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        jMenuReturnToMenu.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jMenuReturnToMenuMouseClicked(evt);
             }
         });
+        jMenu1.add(jMenuReturnToMenu);
 
-        jLabelCheck.setText("jLabel3");
+        jMenuResetGame.setIcon(new javax.swing.ImageIcon(getClass().getResource("/OtherImages/refresh.png"))); // NOI18N
+        jMenuResetGame.setText("Restart Game");
+        jMenuResetGame.setFocusable(false);
+        jMenuResetGame.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        jMenuResetGame.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jMenuResetGameMouseClicked(evt);
+            }
+        });
+        jMenu1.add(jMenuResetGame);
+
+        jMenuHistoryOption.setIcon(new javax.swing.ImageIcon(getClass().getResource("/OtherImages/history.png"))); // NOI18N
+        jMenuHistoryOption.setText("Enable History Button");
+        jMenuHistoryOption.setFocusable(false);
+        jMenuHistoryOption.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        jMenuHistoryOption.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jMenuHistoryOptionMouseClicked(evt);
+            }
+        });
+        jMenu1.add(jMenuHistoryOption);
+
+        jMenu2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/OtherImages/clock.png"))); // NOI18N
+        jMenu2.setText("Reset Timers");
+        jMenu2.setFocusable(false);
+        jMenu2.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        jMenu2.setSelectedIcon(new javax.swing.ImageIcon(getClass().getResource("/OtherImages/back.png"))); // NOI18N
+        jMenu2.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jMenu2MouseClicked(evt);
+            }
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                jMenu2MouseEntered(evt);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                jMenu2MouseExited(evt);
+            }
+        });
+        jMenu1.add(jMenu2);
+
+        jMenuBarGame.add(jMenu1);
+
+        jMenuAbout2.setText("About");
+        jMenuAbout2.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        jMenuAbout2.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jMenuAboutMouseClicked(evt);
+            }
+        });
+        jMenuBarGame.add(jMenuAbout2);
+
+        setJMenuBar(jMenuBarGame);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(72, 72, 72)
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 560, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 49, Short.MAX_VALUE)
+                .addGap(32, 32, 32)
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 600, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addComponent(jButtonShowHistory)
-                        .addGap(46, 46, 46))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(jLabelWhiteClock, javax.swing.GroupLayout.PREFERRED_SIZE, 138, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabelBlackClock, javax.swing.GroupLayout.PREFERRED_SIZE, 138, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabelTurnMarker, javax.swing.GroupLayout.PREFERRED_SIZE, 138, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(29, 29, 29))
                     .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jButtonStart, javax.swing.GroupLayout.PREFERRED_SIZE, 82, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jCheckBoxHistory)
-                            .addComponent(jLabelCheck, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addContainerGap())))
+                        .addComponent(jLabelCheck, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addContainerGap())
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(31, 31, 31)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jButtonShowHistory, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, 148, Short.MAX_VALUE))
+                        .addContainerGap(20, Short.MAX_VALUE))))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(66, 66, 66)
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 560, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(47, Short.MAX_VALUE))
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jLabelBlackClock, javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(86, 86, 86)
-                .addComponent(jLabelTurnMarker, javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(38, 38, 38)
-                .addComponent(jButtonStart, javax.swing.GroupLayout.PREFERRED_SIZE, 82, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jCheckBoxHistory)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabelWhiteClock, javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jLabelCheck)
-                .addGap(19, 19, 19)
-                .addComponent(jButtonShowHistory)
-                .addGap(55, 55, 55))
+                .addGap(29, 29, 29)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jLabelCheck, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, 422, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(24, 24, 24)
+                        .addComponent(jButtonShowHistory, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 597, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addContainerGap(22, Short.MAX_VALUE))))
         );
 
         pack();
@@ -1384,6 +1572,7 @@ public class ChessGUI extends javax.swing.JFrame {
                 System.out.println(jListHistory.getSelectedIndex());
                 if ((jListHistory.getSelectedIndex() + 1) % 2 == 0) {
                     turn = PlayerType.Black;
+
                 } else {
                     turn = PlayerType.White;
                 }
@@ -1399,16 +1588,15 @@ public class ChessGUI extends javax.swing.JFrame {
             }
             jListHistory.setModel(dlm);
 
-            if (jListHistory.getSelectedIndex() != -1) {
-                System.out.println(jListHistory.getSelectedIndex());
-                if ((jListHistory.getSelectedIndex() + 1) % 2 == 0) {
-                    turn = PlayerType.Black;
-                } else {
-                    turn = PlayerType.White;
-                }
-                updateTurnMarker();
-            }
-
+//            if (jListHistory.getSelectedIndex() != -1) {
+//                System.out.println(jListHistory.getSelectedIndex());
+//                if ((jListHistory.getSelectedIndex() + 1) % 2 == 0) {
+//                    turn = PlayerType.Black;
+//                } else {
+//                    turn = PlayerType.White;
+//                }
+//                updateTurnMarker();
+//            }
             jFrameHistory.dispatchEvent(new WindowEvent(jFrameHistory, WindowEvent.WINDOW_CLOSING));
         } else {
             JOptionPane.showMessageDialog(jFrameHistory, "No state was selected. "
@@ -1418,12 +1606,16 @@ public class ChessGUI extends javax.swing.JFrame {
     }//GEN-LAST:event_jButtonRestoreActionPerformed
 
     private void jButtonStartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonStartActionPerformed
-        for (int i = 0; i < TileMatrix.length; i++) {
-            for (int j = 0; j < TileMatrix[i].length; j++) {
-                addMouseListeners(i, j);
+
+        this.setVisible(true);
+
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
                 drawBoard(board.gameBoard, i, j);
+                addMouseListeners(i, j);
             }
         }
+
         jLabelBlackClock.setVisible(true);
         jLabelWhiteClock.setVisible(true);
         jLabelTurnMarker.setVisible(true);
@@ -1434,11 +1626,118 @@ public class ChessGUI extends javax.swing.JFrame {
         WhiteClock.start();
         jCheckBoxHistory.setVisible(false);
         jButtonStart.setVisible(false);
+        jFrameMainMenu.setVisible(false);
     }//GEN-LAST:event_jButtonStartActionPerformed
 
     private void jCheckBoxHistoryActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCheckBoxHistoryActionPerformed
         HistoryCheckBox = !HistoryCheckBox;
     }//GEN-LAST:event_jCheckBoxHistoryActionPerformed
+
+    private void jMenuAboutMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jMenuAboutMouseClicked
+        jMenuAbout.setSelected(false);
+        jMenuAbout2.setSelected(false);
+        JOptionPane.showMessageDialog(jFrameMainMenu, "Made by Ido Zaks 2018\nNote that the game doesn't feature castling");
+    }//GEN-LAST:event_jMenuAboutMouseClicked
+
+    private void jMenuReturnToMenuMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jMenuReturnToMenuMouseClicked
+        resetGame();
+        jCheckBoxHistory.setSelected(false);
+        jFrameMainMenu.setVisible(true);
+        jButtonStart.setVisible(true);
+        jCheckBoxHistory.setVisible(true);
+        this.setVisible(false);
+    }//GEN-LAST:event_jMenuReturnToMenuMouseClicked
+
+    private void jMenuResetGameMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jMenuResetGameMouseClicked
+        resetGame();
+        WhiteClock.start();
+    }//GEN-LAST:event_jMenuResetGameMouseClicked
+
+    private void jMenuHistoryOptionMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jMenuHistoryOptionMouseClicked
+        if (!jButtonShowHistory.isVisible()) {
+            jButtonShowHistory.setVisible(true);
+            jMenuHistoryOption.setText("Disable History Button");
+        } else {
+            jButtonShowHistory.setVisible(false);
+            jMenuHistoryOption.setText("Enable History Button");
+        }
+        jMenu1.setPopupMenuVisible(false);
+        jMenu1.setSelected(false);
+    }//GEN-LAST:event_jMenuHistoryOptionMouseClicked
+
+    private void jMenu2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jMenu2MouseClicked
+        jMenu1.setPopupMenuVisible(false);
+        jMenu1.setSelected(false);
+        BlackMinutes = 0;
+        BlackSeconds = 0;
+        WhiteMinutes = 0;
+        WhiteSeconds = 0;
+        jLabelBlackClock.setText(null);
+        jLabelWhiteClock.setText(null);
+        if (turn == PlayerType.Black) {
+            WhiteClock.stop();
+            BlackClock.restart();
+        } else {
+            WhiteClock.restart();
+            BlackClock.stop();
+        }
+
+    }//GEN-LAST:event_jMenu2MouseClicked
+
+    private void resetGame() {
+        BlackCheck = false;
+        WhiteCheck = false;
+
+        board.gameBoard = null;
+        board.gameBoard = new Piece[8][8];
+        board.gameBoard = Board.PopulateGameBoard(board, blackPlayer, whitePlayer);
+        resetTileBackground();
+        turn = PlayerType.White;
+        updateTurnMarker();
+        for (int i = history.size() - 1; i > 0; i--) {
+            history.remove(i);
+        }
+        if (jFrameHistory.isVisible()) {
+            jFrameHistory.setVisible(false);
+        }
+        trailingRed.stop();
+        colorSwap.stop();
+        BlackSeconds = 0;
+        BlackMinutes = 0;
+        WhiteSeconds = 0;
+        WhiteMinutes = 0;
+        WhiteClock.stop();
+        BlackClock.stop();
+        jLabelBlackClock.setText(null);
+        jLabelWhiteClock.setText(null);
+        jLabelCheck.setText(null);
+
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                drawBoard(board.gameBoard, i, j);
+                resetTileBackground();
+                addMouseListeners(i, j);
+            }
+        }
+        jMenu1.setPopupMenuVisible(false);
+        jMenu1.setSelected(false);
+    }
+
+    private void jMenu2MouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jMenu2MouseEntered
+        jMenu2.setIcon(new ImageIcon(getClass().getResource("/OtherImages/flippedClock.png")));
+    }//GEN-LAST:event_jMenu2MouseEntered
+
+    private void jMenu2MouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jMenu2MouseExited
+        jMenu2.setIcon(new ImageIcon(getClass().getResource("/OtherImages/clock.png")));
+    }//GEN-LAST:event_jMenu2MouseExited
+
+    private void jMenu1MouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jMenu1MouseEntered
+        if (!jButtonShowHistory.isVisible()) {
+            jMenuHistoryOption.setText("Enable History Button");
+        } else {
+            jMenuHistoryOption.setText("Disable History Button");
+        }
+    }//GEN-LAST:event_jMenu1MouseEntered
 
     /**
      * @param args the command line arguments
@@ -1475,7 +1774,7 @@ public class ChessGUI extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new ChessGUI().setVisible(true);
+                new ChessGUI();
             }
         });
     }
@@ -1563,9 +1862,11 @@ public class ChessGUI extends javax.swing.JFrame {
     private javax.swing.JButton jButtonStart;
     private javax.swing.JCheckBox jCheckBoxHistory;
     private javax.swing.JFrame jFrameHistory;
+    private javax.swing.JFrame jFrameMainMenu;
     private javax.swing.JFrame jFramePromotion;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabelBackground;
     private javax.swing.JLabel jLabelBlackClock;
     private javax.swing.JLabel jLabelCheck;
     private javax.swing.JLabel jLabelSelectBishop;
@@ -1575,27 +1876,41 @@ public class ChessGUI extends javax.swing.JFrame {
     private javax.swing.JLabel jLabelSelectRook;
     private javax.swing.JLabel jLabelTurnMarker;
     private javax.swing.JLabel jLabelWhiteClock;
+    private javax.swing.JLayeredPane jLayeredPane1;
     private javax.swing.JList jListHistory;
+    private javax.swing.JMenu jMenu1;
+    private javax.swing.JMenu jMenu2;
+    private javax.swing.JMenu jMenuAbout;
+    private javax.swing.JMenu jMenuAbout2;
+    private javax.swing.JMenuBar jMenuBar;
+    private javax.swing.JMenuBar jMenuBarGame;
+    private javax.swing.JMenu jMenuHistoryOption;
+    private javax.swing.JMenu jMenuResetGame;
+    private javax.swing.JMenu jMenuReturnToMenu;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
+    private javax.swing.JPanel jPanel3;
+    private javax.swing.JPanel jPanelBack;
+    private javax.swing.JPanel jPanelFore;
     private javax.swing.JRadioButton jRadioButton1;
     private javax.swing.JRadioButton jRadioButton2;
     private javax.swing.JRadioButton jRadioButton3;
     private javax.swing.JRadioButton jRadioButton4;
     private javax.swing.JRadioButton jRadioButton5;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JSeparator jSeparator1;
+    private javax.swing.JSeparator jSeparator2;
     // End of variables declaration//GEN-END:variables
 
-    private void Victory(PlayerType playerType, String message) {
-        switch (playerType) {
-            case White:
-                JOptionPane.showMessageDialog(null, new ImageIcon(getClass().getResource("/VictoryIcons/WhiteVictory.png")),
-                        message, JOptionPane.PLAIN_MESSAGE);
-                break;
-            case Black:
-                JOptionPane.showMessageDialog(null, new ImageIcon(getClass().getResource("/VictoryIcons/BlackVictory.png")),
-                        message, JOptionPane.PLAIN_MESSAGE);
-                break;
+    private void Victory() {
+        if (BlackCheck) {
+            jLabelCheck.setText(null);
+            JOptionPane.showMessageDialog(null, new ImageIcon(getClass().getResource("/VictoryIcons/WhiteVictory.png")),
+                    "Victory!", JOptionPane.PLAIN_MESSAGE);
+        } else if (WhiteCheck) {
+            jLabelCheck.setText(null);
+            JOptionPane.showMessageDialog(null, new ImageIcon(getClass().getResource("/VictoryIcons/BlackVictory.png")),
+                    "Victory!", JOptionPane.PLAIN_MESSAGE);
         }
         for (int i = 0; i < TileMatrix.length; i++) {
             for (int j = 0; j < TileMatrix.length; j++) {
@@ -1616,15 +1931,16 @@ public class ChessGUI extends javax.swing.JFrame {
      * takes a gameBoard and checks if there is a checkmate
      *
      * @param testBoard the tested board.
+     * @return
      */
-    public void checkForCheckmate(Piece[][] testBoard) {
+    public boolean checkForCheckmate(Piece[][] testBoard) {
         boolean somethingChecked = false;
         for (int y = 0; y < 8; y++) { // x & y are the King's location on the board.
             for (int x = 0; x < 8; x++) {
                 if (testBoard[y][x] != null && testBoard[y][x].getPieceType().equals(PieceType.King)) {
                     for (int i = 0; i < 8; i++) { // i & j represent the varying location of the hypothetical "attacking piece"
                         for (int j = 0; j < 8; j++) {
-                            if (testBoard[i][j] != null && testBoard[i][j].isValidPath(x, y, testBoard, false, false)) {
+                            if (testBoard[i][j] != null && testBoard[i][j].isValidPath(x, y, testBoard, false)) {
                                 switch (testBoard[y][x].getPlayer().getPlayerColor()) {
                                     case Black:
                                         BlackCheck = true;
@@ -1638,16 +1954,10 @@ public class ChessGUI extends javax.swing.JFrame {
                             }
                         }
                     }
-                    if (BlackCheck) {
+                    if (BlackCheck || WhiteCheck) {
                         if (board.PieceCannotMove(y, x)) {
                             if (!board.SomePieceCanDefend(y, x)) {
-                                Victory(PlayerType.White, "Checkmate!");
-                            }
-                        }
-                    } else if (WhiteCheck) {
-                        if (board.PieceCannotMove(y, x)) {
-                            if (!board.SomePieceCanDefend(y, x)) {
-                                Victory(PlayerType.Black, "Checkmate!");
+                                Victory();
                             }
                         }
                     }
@@ -1657,6 +1967,9 @@ public class ChessGUI extends javax.swing.JFrame {
         if (!somethingChecked) {
             BlackCheck = false;
             WhiteCheck = false;
+            return false;
+        } else {
+            return true;
         }
     }
 

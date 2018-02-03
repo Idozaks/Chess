@@ -11,20 +11,20 @@ public class Pawn extends Piece {
     }
 
     @Override
-    public boolean isValidPath(int finalX, int finalY, Piece[][] board, boolean phantom,boolean IgnoreCheck) {
+    public boolean isValidPath(int finalX, int finalY, Piece[][] board, boolean phantom) {
         if (this.player.getPlayerColor() == PlayerType.Black) {
-            if ((Math.abs(finalX - x) == 1) && ((finalY - y) == 1)) {
+            if ((Math.abs(finalX - x) == 1) && ((finalY - y) == 1)) { //one-space diagonall eating
                 if (board[finalY][finalX] != null) {
                     if (board[finalY][finalX].getPlayer().getPlayerColor() == PlayerType.White) {
-                        return IsMoveLegal(true, check);
+                        return true;
                     }
                 }
             }
             if (y == 1) {
-                if (finalX == x) {
+                if (finalX == x) {  //same column
                     if (((finalY - y) == 1) || (finalY - y) == 2) {
-                        if (board[y + 1][finalX] == null) {
-                            return IsMoveLegal((board[finalY][finalX] == null), check);
+                        if (board[y + 1][finalX] == null) { //the pawn can only move two space vertically if it's his "first move"
+                            return true;
                         }
                     }
                 } else {
@@ -32,14 +32,20 @@ public class Pawn extends Piece {
                 }
             } else {
                 if (finalX == x && (finalY - y) == 1) {
-                    return IsMoveLegal((board[finalY][finalX] == null), check);
+                    if (board[finalY][finalX] != null) {
+                        if (!board[finalY][finalX].getPlayer().getPlayerColor().equals(this.player.getPlayerColor())) {
+                            return false;
+                        }
+                    } else {
+                        return true;
+                    }
                 }
             }
         } else if (this.player.getPlayerColor() == PlayerType.White) {
             if ((Math.abs(finalX - x) == 1) && ((finalY - y) == -1)) {
                 if (board[finalY][finalX] != null) {
                     if (board[finalY][finalX].getPlayer().getPlayerColor() == PlayerType.Black) {
-                        return IsMoveLegal(true, check);
+                        return true;
                     }
                 }
             }
@@ -47,7 +53,7 @@ public class Pawn extends Piece {
                 if (finalX == x) {
                     if (((finalY - y) == -1) || (finalY - y) == -2) {
                         if (board[y - 1][finalX] == null) {
-                            return IsMoveLegal((board[finalY][finalX] == null), check);
+                            return true;
                         }
                     }
                 } else {
@@ -55,7 +61,13 @@ public class Pawn extends Piece {
                 }
             } else {
                 if (finalX == x && (finalY - y) == -1) {
-                    return IsMoveLegal((board[finalY][finalX] == null), check);
+                    if (board[finalY][finalX] != null) {
+                        if (!board[finalY][finalX].getPlayer().getPlayerColor().equals(this.player.getPlayerColor())) {
+                            return false;
+                        }
+                    } else {
+                        return true;
+                    }
                 }
             }
         }

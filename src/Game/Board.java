@@ -16,7 +16,7 @@ public class Board {
 
     public Board(BlackPlayer bp, WhitePlayer wp) {
         gameBoard = new Piece[8][8];
-        PopulateGameBoard(bp, wp);
+        PopulateGameBoard(this, bp, wp);
     }
 
     /**
@@ -100,7 +100,7 @@ public class Board {
     /**
      * Used to test if a gameBoard contains a check condition.
      *
-     * @param testedBoard
+     * @param testedBoard the board which you want to test for check.
      * @return true if testBoard contains a check in it.
      */
     public static boolean JustCheckForCheck(Piece[][] testedBoard) {
@@ -109,7 +109,7 @@ public class Board {
                 if (testedBoard[y][x] != null && testedBoard[y][x].getPieceType().equals(PieceType.King)) {
                     for (int i = 0; i < 8; i++) {
                         for (int j = 0; j < 8; j++) {
-                            if (testedBoard[i][j] != null && testedBoard[i][j].isValidPath(x, y, testedBoard, false, true)) {
+                            if (testedBoard[i][j] != null && testedBoard[i][j].isValidPath(x, y, testedBoard, false)) {
                                 return true;
                             }
                         }
@@ -146,33 +146,37 @@ public class Board {
     /**
      * Used by the constructor to set the pieces for the starting position
      *
-     * @param bp
-     * @param wp
+     * @param board the board you want to populate 
+     * @param bp the black player object
+     * @param wp the white player object
+     * @return the populated gameBoard
      */
-    private void PopulateGameBoard(BlackPlayer bp, WhitePlayer wp) {
-//        gameBoard[0][0] = new Rook(0, 0, bp, this);
-//        gameBoard[0][1] = new Knight(1, 0, bp, this);
-//        gameBoard[0][2] = new Bishop(2, 0, bp, this);
-        gameBoard[0][3] = new Queen(3, 0, bp, this);
-        gameBoard[0][4] = new King(4, 0, bp, this);
-//        gameBoard[0][5] = new Bishop(5, 0, bp, this);
-//        gameBoard[0][6] = new Knight(6, 0, bp, this);
-//        gameBoard[0][7] = new Rook(7, 0, bp, this);
-//        for (int j = 0; j < gameBoard[1].length; j++) {
-//            gameBoard[1][j] = new Pawn(j, 1, bp, this);
-//        }
+    public static Piece[][] PopulateGameBoard(Board board, BlackPlayer bp, WhitePlayer wp) {
+        board.gameBoard[0][0] = new Rook(0, 0, bp, board);
+        board.gameBoard[0][1] = new Knight(1, 0, bp, board);
+        board.gameBoard[0][2] = new Bishop(2, 0, bp, board);
+        board.gameBoard[0][3] = new Queen(3, 0, bp, board);
+        board.gameBoard[0][4] = new King(4, 0, bp, board);
+        board.gameBoard[0][5] = new Bishop(5, 0, bp, board);
+        board.gameBoard[0][6] = new Knight(6, 0, bp, board);
+        board.gameBoard[0][7] = new Rook(7, 0, bp, board);
+        for (int j = 0; j < board.gameBoard[1].length; j++) {
+            board.gameBoard[1][j] = new Pawn(j, 1, bp, board);
+        }
 
-//        gameBoard[7][0] = new Rook(0, 7, wp, this);
-//        gameBoard[7][1] = new Knight(1, 7, wp, this);
-//        gameBoard[7][2] = new Bishop(2, 7, wp, this);
-//        gameBoard[7][3] = new Queen(3, 7, wp, this);
-//        gameBoard[7][4] = new King(4, 7, wp, this);
-//        gameBoard[7][5] = new Bishop(5, 7, wp, this);
-//        gameBoard[7][6] = new Knight(6, 7, wp, this);
-        gameBoard[7][7] = new Rook(7, 7, wp, this);
+        board.gameBoard[7][0] = new Rook(0, 7, wp, board);
+        board.gameBoard[7][1] = new Knight(1, 7, wp, board);
+        board.gameBoard[7][2] = new Bishop(2, 7, wp, board);
+        board.gameBoard[7][3] = new Queen(3, 7, wp, board);
+        board.gameBoard[7][4] = new King(4, 7, wp, board);
+        board.gameBoard[7][5] = new Bishop(5, 7, wp, board);
+        board.gameBoard[7][6] = new Knight(6, 7, wp, board);
+        board.gameBoard[7][7] = new Rook(7, 7, wp, board);
 
-//        for (int j = 0; j < gameBoard[1].length; j++) {
-//            gameBoard[6][j] = new Pawn(j, 6, wp, this);
-//        }
+        for (int j = 0; j < board.gameBoard[1].length; j++) {
+            board.gameBoard[6][j] = new Pawn(j, 6, wp, board);
+        }
+        return board.gameBoard;
     }
+
 }

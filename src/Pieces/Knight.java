@@ -11,19 +11,19 @@ public class Knight extends Piece {
     }
 
     @Override
-    public boolean isValidPath(int finalX, int finalY, Piece[][] board, boolean phantom,boolean IgnoreCheck) {
+    public boolean isValidPath(int finalX, int finalY, Piece[][] board, boolean phantom) {
         boolean available;
         available = (((Math.abs(finalX - this.x) == 2) && (Math.abs(finalY - this.y) == 1))
                 || ((Math.abs(finalX - this.x) == 1) && (Math.abs(finalY - this.y) == 2)));
         if (available) {
             if (board[finalY][finalX] != null) {
                 if (this.player.getPlayerColor() == PlayerType.Black) {
-                    return IsMoveLegal((board[finalY][finalX].getPlayer().getPlayerColor() == PlayerType.White), check);
+                    return board[finalY][finalX].getPlayer().getPlayerColor() == PlayerType.White;
                 } else if (this.player.getPlayerColor() == PlayerType.White) {
-                    return IsMoveLegal((board[finalY][finalX].getPlayer().getPlayerColor() == PlayerType.Black), check);
+                    return board[finalY][finalX].getPlayer().getPlayerColor() == PlayerType.Black;
                 }
             }
-            return IsMoveLegal(true, check);
+            return true;
         }
         return false;
     }

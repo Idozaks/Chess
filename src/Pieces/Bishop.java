@@ -14,7 +14,7 @@ public class Bishop extends Piece {
     }
 
     @Override
-    public boolean isValidPath(int finalX, int finalY, Piece[][] board, boolean phantom, boolean IgnoreCheck) {
+    public boolean isValidPath(int finalX, int finalY, Piece[][] board, boolean phantom) {
         int direction = 0;
 
         if ((finalY - y) < 0) { // up 
@@ -32,7 +32,7 @@ public class Bishop extends Piece {
             canOrNo = false;
         }
         if (!canOrNo) {
-            MoveIsValid = canOrNo;
+            return canOrNo;
         }
         switch (direction) {
             case UP_RIGHT:
@@ -43,25 +43,19 @@ public class Bishop extends Piece {
                                 if (board[i][j].getPlayer().getPlayerColor() == PlayerType.White) {
                                     return false;
                                 } else if (board[i][j].getPlayer().getPlayerColor() == PlayerType.Black) {
-                                    MoveIsValid = (i == finalY && j == finalX);
+                                    return (i == finalY && j == finalX);
                                 }
-                            } else {
-                                MoveIsValid = true;
                             }
                         } else if (this.player.getPlayerColor() == PlayerType.Black) {
                             if (board[i][j] != null) {
                                 if (board[i][j].getPlayer().getPlayerColor() == PlayerType.Black) {
                                     return false;
                                 } else if (board[i][j].getPlayer().getPlayerColor() == PlayerType.White) {
-                                    MoveIsValid = (i == finalY && j == finalX);
+                                    return (i == finalY && j == finalX);
                                 }
-                            } else {
-                                MoveIsValid = true;
                             }
                         }
-                        if (i <= 0 || j <= 0) {
-                            break;
-                        }
+
                     }
                 }
                 break;
@@ -74,25 +68,19 @@ public class Bishop extends Piece {
                                 if (board[i][j].getPlayer().getPlayerColor() == PlayerType.White) {
                                     return false;
                                 } else if (board[i][j].getPlayer().getPlayerColor() == PlayerType.Black) {
-                                    MoveIsValid = (i == finalY && j == finalX);
+                                    return (i == finalY && j == finalX);
                                 }
-                            } else {
-                                MoveIsValid = true;
                             }
                         } else if (this.player.getPlayerColor() == PlayerType.Black) {
                             if (board[i][j] != null) {
                                 if (board[i][j].getPlayer().getPlayerColor() == PlayerType.Black) {
                                     return false;
                                 } else if (board[i][j].getPlayer().getPlayerColor() == PlayerType.White) {
-                                    MoveIsValid = (i == finalY && j == finalX);
+                                    return (i == finalY && j == finalX);
                                 }
-                            } else {
-                                MoveIsValid = true;
                             }
                         }
-                        if (i <= 0 || j <= 0) {
-                            break;
-                        }
+
                     }
                 }
 
@@ -106,26 +94,19 @@ public class Bishop extends Piece {
                                 if (board[i][j].getPlayer().getPlayerColor() == PlayerType.White) {
                                     return false;
                                 } else if (board[i][j].getPlayer().getPlayerColor() == PlayerType.Black) {
-                                    MoveIsValid = (i == finalY && j == finalX);
+                                    return (i == finalY && j == finalX);
 
                                 }
-                            } else {
-                                MoveIsValid = true;
                             }
                         } else if (this.player.getPlayerColor() == PlayerType.Black) {
                             if (board[i][j] != null) {
                                 if (board[i][j].getPlayer().getPlayerColor() == PlayerType.Black) {
                                     return false;
                                 } else if (board[i][j].getPlayer().getPlayerColor() == PlayerType.White) {
-                                    MoveIsValid = (i == finalY && j == finalX);
+                                    return (i == finalY && j == finalX);
 
                                 }
-                            } else {
-                                MoveIsValid = true;
                             }
-                        }
-                        if (i <= 0 || j <= 0) {
-                            break;
                         }
                     }
                 }
@@ -139,39 +120,26 @@ public class Bishop extends Piece {
                                 if (board[i][j].getPlayer().getPlayerColor() == PlayerType.White) {
                                     return false;
                                 } else if (board[i][j].getPlayer().getPlayerColor() == PlayerType.Black) {
-                                    MoveIsValid = (i == finalY && j == finalX);
+                                    return (i == finalY && j == finalX);
 
                                 }
-                            } else {
-                                MoveIsValid = true;
                             }
                         } else if (this.player.getPlayerColor() == PlayerType.Black) {
                             if (board[i][j] != null) {
                                 if (board[i][j].getPlayer().getPlayerColor() == PlayerType.Black) {
                                     return false;
                                 } else if (board[i][j].getPlayer().getPlayerColor() == PlayerType.White) {
-                                    MoveIsValid = (i == finalY && j == finalX);
+                                    return (i == finalY && j == finalX);
                                 }
-                            } else {
-                                MoveIsValid = true;
-                            }
+                            } 
                         }
-                        if (i <= 0 || j <= 0) {
-                            break;
-                        }
+                        
                     }
                 }
                 break;
 
         }
-        if (!IgnoreCheck) {
-            if (MoveIsValid) {
-                return IsMoveLegal(true, check);
-            } else {
-                return MoveIsValid;
-            }
-        }
-        return MoveIsValid;
+        return true;
     }
 
 }

@@ -13,12 +13,12 @@ public class King extends Piece {
     }
 
     @Override
-    public boolean isValidPath(int finalX, int finalY, Piece[][] board, boolean phantom, boolean IgnoreCheck) {
+    public boolean isValidPath(int finalX, int finalY, Piece[][] board, boolean phantom) {
 
         Piece[][] movedKingBoard = Board.copyValueOfGameboard(board);
 
         if (!phantom) {
-            if (this.isValidPath(finalX, finalY, board, true, false)) {
+            if (this.isValidPath(finalX, finalY, board, true)) {
                 movedKingBoard[finalY][finalX] = null;
                 movedKingBoard[finalY][finalX] = this;
                 movedKingBoard[y][x] = null;
@@ -27,7 +27,7 @@ public class King extends Piece {
                 for (int j = 0; j < 8; j++) {
                     if (movedKingBoard[i][j] != null) {
                         if (!movedKingBoard[i][j].getPieceType().equals(PieceType.King) && movedKingBoard[i][j] != null) {
-                            boolean pathForEach = movedKingBoard[i][j].isValidPath(finalX, finalY, movedKingBoard, true, true);
+                            boolean pathForEach = movedKingBoard[i][j].isValidPath(finalX, finalY, movedKingBoard, true);
                             if (!movedKingBoard[i][j].getPlayer().getPlayerColor().equals(this.player.getPlayerColor()) && pathForEach) {
                                 //the statement means that if a piece, of the opposite color, can go
                                  //to the tile where the king is planning to go - that possibility is false.
