@@ -236,7 +236,7 @@ public class ChessGUI extends javax.swing.JFrame {
                 (board.gameBoard[iIndex][jIndex] != null) {
 
             if //<editor-fold defaultstate="collapsed" desc="(same turn-color click = displays paths)">
-                    (board.gameBoard[iIndex][jIndex].getPlayer().getPlayerColor().equals(turn)) {
+                    (board.gameBoard[iIndex][jIndex].getPlayerColor().equals(turn)) {
                 focusedPiece = board.gameBoard[iIndex][jIndex].getPieceType(); //sets "focusedPiece" to the filled tile's piece.
                 focusedPieceX = jIndex;
                 focusedPieceY = iIndex;
@@ -249,10 +249,10 @@ public class ChessGUI extends javax.swing.JFrame {
                 PlayerType DeadKingColor;
 
                 if (BlackCheck && board.gameBoard[focusedPieceY][focusedPieceX]
-                        .getPlayer().getPlayerColor() == PlayerType.Black) {
+                        .getPlayerColor() == PlayerType.Black) {
                     Victory();
                 } else if (WhiteCheck && board.gameBoard[focusedPieceY][focusedPieceX]
-                        .getPlayer().getPlayerColor() == PlayerType.White) {
+                        .getPlayerColor() == PlayerType.White) {
                     Victory();
                 }
 
@@ -266,7 +266,7 @@ public class ChessGUI extends javax.swing.JFrame {
                 resetTileBackground(); // sets GUI board to black & white
 
                 if (board.gameBoard[iIndex][jIndex].getPieceType().equals(PieceType.Pawn) && !KingEaten) {
-                    if (board.gameBoard[iIndex][jIndex].getPlayer().getPlayerColor() == PlayerType.Black) {
+                    if (board.gameBoard[iIndex][jIndex].getPlayerColor() == PlayerType.Black) {
                         if (iIndex == 7) {
                             PawnEdge(blackPlayer, jIndex, iIndex);
                         }
@@ -276,7 +276,7 @@ public class ChessGUI extends javax.swing.JFrame {
                         }
                     }
                 }
-                addMouseListeners(iIndex, jIndex); // refreshes mouseListeners
+
                 for (int i = 0; i < board.gameBoard.length; i++) {
                     for (int j = 0; j < board.gameBoard[0].length; j++) {
                         drawBoard(board.gameBoard, i, j);
@@ -301,12 +301,18 @@ public class ChessGUI extends javax.swing.JFrame {
                 }
 
                 if (KingEaten) {
-                    DeadKingColor = board.gameBoard[iIndex][jIndex].getPlayer().getPlayerColor();
+                    DeadKingColor = board.gameBoard[iIndex][jIndex].getPlayerColor();
                     Victory();
                     jLabelTurnMarker.setVisible(false);
                 }
                 if (jFrameHistory.isVisible()) { //refresh history list
                     jButtonShowHistoryActionPerformed(null);
+                }
+
+                for (int i = 0; i < 8; i++) {
+                    for (int j = 0; j < 8; j++) {
+                        addMouseListeners(i, j);
+                    }
                 }
 
                 checkForCheckmate(board.gameBoard);
@@ -322,10 +328,10 @@ public class ChessGUI extends javax.swing.JFrame {
                         (PiecePossibleTiles[iIndex][jIndex]) {
 
                     if (BlackCheck && board.gameBoard[focusedPieceY][focusedPieceX]
-                            .getPlayer().getPlayerColor() == PlayerType.Black) {
+                            .getPlayerColor() == PlayerType.Black) {
                         Victory();
                     } else if (WhiteCheck && board.gameBoard[focusedPieceY][focusedPieceX]
-                            .getPlayer().getPlayerColor() == PlayerType.White) {
+                            .getPlayerColor() == PlayerType.White) {
                         Victory();
                     }
 
@@ -336,17 +342,18 @@ public class ChessGUI extends javax.swing.JFrame {
                     resetTileBackground();
 
                     if (board.gameBoard[iIndex][jIndex].getPieceType().equals(PieceType.Pawn)) {
-                        if (board.gameBoard[iIndex][jIndex].getPlayer().getPlayerColor() == PlayerType.Black) {
+                        if (board.gameBoard[iIndex][jIndex].getPlayerColor() == PlayerType.Black) {
                             if (iIndex == 7) {
                                 PawnEdge(blackPlayer, jIndex, iIndex);
                             }
                         } else {
                             if (iIndex == 0) {
                                 PawnEdge(whitePlayer, jIndex, iIndex);
+
                             }
                         }
                     }
-                    addMouseListeners(iIndex, jIndex);
+
                     for (int i = 0; i < board.gameBoard.length; i++) {
                         for (int j = 0; j < board.gameBoard[0].length; j++) {
                             drawBoard(board.gameBoard, i, j);
@@ -370,6 +377,12 @@ public class ChessGUI extends javax.swing.JFrame {
                     focusedPieceY = -1;
                     history.add(Board.copyValueOfGameboard(board.gameBoard));
 
+                    for (int i = 0; i < 8; i++) {
+                        for (int j = 0; j < 8; j++) {
+                            addMouseListeners(i, j);
+                        }
+                    }
+
                     if (jFrameHistory.isVisible()) { //refresh history list
                         jButtonShowHistoryActionPerformed(null);
                     }
@@ -385,15 +398,6 @@ public class ChessGUI extends javax.swing.JFrame {
 
         updateTurnMarker();
 
-        {
-            if (!(colorSwap.isRunning() || trailingRed.isRunning())) {
-                if (BlackCheck) {
-                    jLabelCheck.setText("Black is checked!");
-                } else if (WhiteCheck) {
-                    jLabelCheck.setText("White is checked!");
-                }
-            }
-        }
     }
 
     void LightUpTile(int x, int y) {
@@ -458,6 +462,14 @@ public class ChessGUI extends javax.swing.JFrame {
 
         jLabelTurnMarker.setBackground(background);
         jLabelTurnMarker.setForeground(foreground);
+
+        if (!(colorSwap.isRunning() || trailingRed.isRunning())) {
+            if (BlackCheck) {
+                jLabelCheck.setText("Black is checked!");
+            } else if (WhiteCheck) {
+                jLabelCheck.setText("White is checked!");
+            }
+        }
     }
 
     /**
@@ -1388,19 +1400,19 @@ public class ChessGUI extends javax.swing.JFrame {
                             jFramePromotion.setVisible(false);
                             switch (i) {
                                 case 0:
-                                    RevivePiece(PieceType.Pawn, player, x, y);
+                                    RevivePawn(PieceType.Pawn, player, x, y);
                                     break;
                                 case 1:
-                                    RevivePiece(PieceType.Queen, player, x, y);
+                                    RevivePawn(PieceType.Queen, player, x, y);
                                     break;
                                 case 2:
-                                    RevivePiece(PieceType.Knight, player, x, y);
+                                    RevivePawn(PieceType.Knight, player, x, y);
                                     break;
                                 case 3:
-                                    RevivePiece(PieceType.Rook, player, x, y);
+                                    RevivePawn(PieceType.Rook, player, x, y);
                                     break;
                                 case 4:
-                                    RevivePiece(PieceType.Bishop, player, x, y);
+                                    RevivePawn(PieceType.Bishop, player, x, y);
                                     break;
                             }
                         }
@@ -1424,7 +1436,7 @@ public class ChessGUI extends javax.swing.JFrame {
      * @see Pawn
      * @see Piece
      */
-    void RevivePiece(PieceType piece, Player player, int x, int y) {
+    void RevivePawn(PieceType piece, Player player, int x, int y) {
         board.gameBoard[y][x] = null;
         switch (piece) {
             case Bishop:
@@ -1443,12 +1455,15 @@ public class ChessGUI extends javax.swing.JFrame {
                 board.gameBoard[y][x] = new Rook(x, y, player, board);
                 break;
         }
-        addMouseListeners(y, x);
+
         for (int i = 0; i < board.gameBoard.length; i++) {
             for (int j = 0; j < board.gameBoard[0].length; j++) {
                 drawBoard(board.gameBoard, i, j);
+                addMouseListeners(y, x);
             }
         }
+        checkForCheckmate(board.gameBoard);
+        updateTurnMarker();
     }
 
     private void jLabelSelectPawnMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabelSelectPawnMouseClicked
@@ -1496,6 +1511,7 @@ public class ChessGUI extends javax.swing.JFrame {
         jFrameHistory.setLocation(this.getX() + this.getWidth(), this.getY());
 
         DefaultListModel<String> dlm = new DefaultListModel<>();
+        dlm.addElement("Start-Board");
         for (int i = 1; i < history.size(); i++) {
             dlm.addElement("Move " + i);
         }
@@ -1906,11 +1922,11 @@ public class ChessGUI extends javax.swing.JFrame {
         if (BlackCheck) {
             jLabelCheck.setText(null);
             JOptionPane.showMessageDialog(null, new ImageIcon(getClass().getResource("/VictoryIcons/WhiteVictory.png")),
-                    "Victory!", JOptionPane.PLAIN_MESSAGE);
+                    "Victory!", JOptionPane.INFORMATION_MESSAGE);
         } else if (WhiteCheck) {
             jLabelCheck.setText(null);
             JOptionPane.showMessageDialog(null, new ImageIcon(getClass().getResource("/VictoryIcons/BlackVictory.png")),
-                    "Victory!", JOptionPane.PLAIN_MESSAGE);
+                    "Victory!", JOptionPane.INFORMATION_MESSAGE);
         }
         for (int i = 0; i < TileMatrix.length; i++) {
             for (int j = 0; j < TileMatrix.length; j++) {
@@ -1919,8 +1935,37 @@ public class ChessGUI extends javax.swing.JFrame {
         }
         if (new Random().nextBoolean()) {
             colorSwap.start();
+            Thread t = null;
+
+            t = new Thread(new Runnable() {
+
+                @Override
+                public void run() {
+                    int result = JOptionPane.showConfirmDialog(null, "Play Again?", null,
+                            JOptionPane.YES_NO_OPTION);
+                    if (result == JOptionPane.YES_OPTION) {
+                        resetGame();
+                    }
+                }
+            });
+            t.start();
+
         } else {
             trailingRed.start();
+            Thread t = null;
+
+            t = new Thread(new Runnable() {
+
+                @Override
+                public void run() {
+                    int result = JOptionPane.showConfirmDialog(null, "Play Again?", null,
+                            JOptionPane.YES_NO_OPTION);
+                    if (result == JOptionPane.YES_OPTION) {
+                        resetGame();
+                    }
+                }
+            });
+            t.start();
         }
 
         BlackClock.stop();
@@ -1941,7 +1986,7 @@ public class ChessGUI extends javax.swing.JFrame {
                     for (int i = 0; i < 8; i++) { // i & j represent the varying location of the hypothetical "attacking piece"
                         for (int j = 0; j < 8; j++) {
                             if (testBoard[i][j] != null && testBoard[i][j].isValidPath(x, y, testBoard, false)) {
-                                switch (testBoard[y][x].getPlayer().getPlayerColor()) {
+                                switch (testBoard[y][x].getPlayerColor()) {
                                     case Black:
                                         BlackCheck = true;
                                         somethingChecked = true;

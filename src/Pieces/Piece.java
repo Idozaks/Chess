@@ -69,6 +69,10 @@ public abstract class Piece {
     public Player getPlayer() {
         return player;
     }
+    
+    public PlayerType getPlayerColor(){
+        return player.getPlayerColor();
+    }
 
     /**
      * returns whether the piece can move to the specified place
