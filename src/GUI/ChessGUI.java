@@ -1,11 +1,15 @@
 package GUI;
 
 import GUI.PiecesIcons.Icons;
+import GUI.TileColors.BlackAndWhite;
+import GUI.TileColors.BlueAndWhite;
+import GUI.TileColors.Colors;
+import GUI.TileColors.GreenAndWhite;
+import GUI.TileColors.Wood;
 import Game.*;
 import Pieces.*;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Desktop;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -17,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Random;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JRadioButton;
@@ -42,8 +45,7 @@ public class ChessGUI extends javax.swing.JFrame {
      */
     public Board board = new Board(blackPlayer, whitePlayer);
 
-    Color RedOnWhite = new Color(255, 130, 127);
-    Color RedOnBlack = new Color(103, 4, 0);
+    Colors myColors = new BlackAndWhite();
 
     /**
      * An {@code ArrayList} that stores "snapshots" of the gameBoard. used to
@@ -148,6 +150,7 @@ public class ChessGUI extends javax.swing.JFrame {
                         break outerloop;
                     }
                 }
+                System.out.println("running");
             }
         });
         colorSwap = new Timer(100, new ActionListener() {
@@ -402,9 +405,9 @@ public class ChessGUI extends javax.swing.JFrame {
 
     void LightUpTile(int x, int y) {
         if (TileMatrix[y][x].getBackground().equals(Color.WHITE)) {
-            TileMatrix[y][x].setBackground(RedOnWhite);
+            TileMatrix[y][x].setBackground(myColors.redOnBrightColor);
         } else if (TileMatrix[y][x].getBackground().equals(Color.BLACK)) {
-            TileMatrix[y][x].setBackground(RedOnBlack);
+            TileMatrix[y][x].setBackground(myColors.redOnDarkColor);
         }
     }
     /**
@@ -442,10 +445,10 @@ public class ChessGUI extends javax.swing.JFrame {
             for (int j = 0; j < TileMatrix[i].length; j++) {
                 if (paths[i][j]) {
                     //TileMatrix[i][j].setBackground(RedOnBlack);
-                    if (TileMatrix[i][j].getBackground().equals(Color.BLACK)) {
-                        TileMatrix[i][j].setBackground(RedOnBlack);
+                    if (TileMatrix[i][j].getBackground().equals(myColors.darkColor)) {
+                        TileMatrix[i][j].setBackground(myColors.redOnDarkColor);
                     } else {
-                        TileMatrix[i][j].setBackground(RedOnWhite);
+                        TileMatrix[i][j].setBackground(myColors.redOnBrightColor);
                     }
                 }
             }
@@ -480,9 +483,9 @@ public class ChessGUI extends javax.swing.JFrame {
         for (int i = 0; i < TileMatrix.length; i++) {
             for (int j = 0; j < TileMatrix[i].length; j++) {
                 if ((i + j) % 2 == 0) {
-                    TileMatrix[i][j].setBackground(Color.WHITE);
+                    TileMatrix[i][j].setBackground(myColors.brightColor);
                 } else {
-                    TileMatrix[i][j].setBackground(Color.BLACK);
+                    TileMatrix[i][j].setBackground(myColors.darkColor);
                 }
             }
         }
@@ -603,6 +606,11 @@ public class ChessGUI extends javax.swing.JFrame {
         jMenu1 = new javax.swing.JMenu();
         jMenuReturnToMenu = new javax.swing.JMenu();
         jMenuResetGame = new javax.swing.JMenu();
+        jMenu4 = new javax.swing.JMenu();
+        jMenuItemBlackWhite = new javax.swing.JMenuItem();
+        jMenuItemBlueWhite = new javax.swing.JMenuItem();
+        jMenuItemGreenWhite = new javax.swing.JMenuItem();
+        jMenuItemWood = new javax.swing.JMenuItem();
         jMenuHistoryOption = new javax.swing.JMenu();
         jMenu2 = new javax.swing.JMenu();
         jMenuAbout2 = new javax.swing.JMenu();
@@ -1282,6 +1290,60 @@ public class ChessGUI extends javax.swing.JFrame {
         });
         jMenu1.add(jMenuResetGame);
 
+        jMenu4.setIcon(new javax.swing.ImageIcon(getClass().getResource("/OtherImages/brush.png"))); // NOI18N
+        jMenu4.setText("Change Color");
+        jMenu4.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+
+        jMenuItemBlackWhite.setBackground(new java.awt.Color(0, 0, 0));
+        jMenuItemBlackWhite.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        jMenuItemBlackWhite.setForeground(new java.awt.Color(255, 255, 255));
+        jMenuItemBlackWhite.setText("Black and White");
+        jMenuItemBlackWhite.setOpaque(true);
+        jMenuItemBlackWhite.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemBlackWhiteActionPerformed(evt);
+            }
+        });
+        jMenu4.add(jMenuItemBlackWhite);
+
+        jMenuItemBlueWhite.setBackground(new java.awt.Color(27, 82, 128));
+        jMenuItemBlueWhite.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        jMenuItemBlueWhite.setForeground(new java.awt.Color(255, 255, 255));
+        jMenuItemBlueWhite.setText("Blue and White");
+        jMenuItemBlueWhite.setOpaque(true);
+        jMenuItemBlueWhite.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemBlueWhiteActionPerformed(evt);
+            }
+        });
+        jMenu4.add(jMenuItemBlueWhite);
+
+        jMenuItemGreenWhite.setBackground(new java.awt.Color(30, 97, 66));
+        jMenuItemGreenWhite.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        jMenuItemGreenWhite.setForeground(new java.awt.Color(255, 255, 255));
+        jMenuItemGreenWhite.setText("Green and White");
+        jMenuItemGreenWhite.setOpaque(true);
+        jMenuItemGreenWhite.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemGreenWhiteActionPerformed(evt);
+            }
+        });
+        jMenu4.add(jMenuItemGreenWhite);
+
+        jMenuItemWood.setBackground(new java.awt.Color(100, 41, 16));
+        jMenuItemWood.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        jMenuItemWood.setForeground(new java.awt.Color(255, 255, 255));
+        jMenuItemWood.setText("Wooden");
+        jMenuItemWood.setOpaque(true);
+        jMenuItemWood.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemWoodActionPerformed(evt);
+            }
+        });
+        jMenu4.add(jMenuItemWood);
+
+        jMenu1.add(jMenu4);
+
         jMenuHistoryOption.setIcon(new javax.swing.ImageIcon(getClass().getResource("/OtherImages/history.png"))); // NOI18N
         jMenuHistoryOption.setText("Enable History Button");
         jMenuHistoryOption.setFocusable(false);
@@ -1652,7 +1714,7 @@ public class ChessGUI extends javax.swing.JFrame {
     private void jMenuAboutMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jMenuAboutMouseClicked
         jMenuAbout.setSelected(false);
         jMenuAbout2.setSelected(false);
-        JOptionPane.showMessageDialog(jFrameMainMenu, "Made by Ido Zaks 2018\nNote that the game doesn't feature castling");
+        JOptionPane.showMessageDialog(jFrameMainMenu, "Made by Ido Zaks 2018\nNote that the game doesn't feature castling (הצרחה)");
     }//GEN-LAST:event_jMenuAboutMouseClicked
 
     private void jMenuReturnToMenuMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jMenuReturnToMenuMouseClicked
@@ -1703,6 +1765,8 @@ public class ChessGUI extends javax.swing.JFrame {
     private void resetGame() {
         BlackCheck = false;
         WhiteCheck = false;
+
+        myColors = new BlackAndWhite();
 
         board.gameBoard = null;
         board.gameBoard = new Piece[8][8];
@@ -1755,6 +1819,38 @@ public class ChessGUI extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_jMenu1MouseEntered
 
+    private void jMenuItemBlackWhiteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemBlackWhiteActionPerformed
+        myColors = new BlackAndWhite();
+        resetTileBackground();
+        focusedPiece = null;
+        focusedPieceX = -1;
+        focusedPieceY = -1;
+    }//GEN-LAST:event_jMenuItemBlackWhiteActionPerformed
+
+    private void jMenuItemBlueWhiteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemBlueWhiteActionPerformed
+        myColors = new BlueAndWhite();
+        resetTileBackground();
+        focusedPiece = null;
+        focusedPieceX = -1;
+        focusedPieceY = -1;
+    }//GEN-LAST:event_jMenuItemBlueWhiteActionPerformed
+
+    private void jMenuItemGreenWhiteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemGreenWhiteActionPerformed
+        myColors = new GreenAndWhite();
+        resetTileBackground();
+        focusedPiece = null;
+        focusedPieceX = -1;
+        focusedPieceY = -1;
+    }//GEN-LAST:event_jMenuItemGreenWhiteActionPerformed
+
+    private void jMenuItemWoodActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemWoodActionPerformed
+        myColors = new Wood();
+        resetTileBackground();
+        focusedPiece = null;
+        focusedPieceX = -1;
+        focusedPieceY = -1;
+    }//GEN-LAST:event_jMenuItemWoodActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -1798,10 +1894,10 @@ public class ChessGUI extends javax.swing.JFrame {
     void swapColors() {
         for (int i = 0; i < TileMatrix.length; i++) {
             for (int j = 0; j < TileMatrix[i].length; j++) {
-                if (TileMatrix[i][j].getBackground().equals(Color.BLACK)) {
-                    TileMatrix[i][j].setBackground(Color.WHITE);
-                } else if (TileMatrix[i][j].getBackground().equals(Color.WHITE)) {
-                    TileMatrix[i][j].setBackground(Color.BLACK);
+                if (TileMatrix[i][j].getBackground().equals(myColors.darkColor)) {
+                    TileMatrix[i][j].setBackground(myColors.brightColor);
+                } else if (TileMatrix[i][j].getBackground().equals(myColors.brightColor)) {
+                    TileMatrix[i][j].setBackground(myColors.darkColor);
                 }
             }
         }
@@ -1896,11 +1992,16 @@ public class ChessGUI extends javax.swing.JFrame {
     private javax.swing.JList jListHistory;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu2;
+    private javax.swing.JMenu jMenu4;
     private javax.swing.JMenu jMenuAbout;
     private javax.swing.JMenu jMenuAbout2;
     private javax.swing.JMenuBar jMenuBar;
     private javax.swing.JMenuBar jMenuBarGame;
     private javax.swing.JMenu jMenuHistoryOption;
+    private javax.swing.JMenuItem jMenuItemBlackWhite;
+    private javax.swing.JMenuItem jMenuItemBlueWhite;
+    private javax.swing.JMenuItem jMenuItemGreenWhite;
+    private javax.swing.JMenuItem jMenuItemWood;
     private javax.swing.JMenu jMenuResetGame;
     private javax.swing.JMenu jMenuReturnToMenu;
     private javax.swing.JPanel jPanel1;
@@ -1935,37 +2036,8 @@ public class ChessGUI extends javax.swing.JFrame {
         }
         if (new Random().nextBoolean()) {
             colorSwap.start();
-            Thread t = null;
-
-            t = new Thread(new Runnable() {
-
-                @Override
-                public void run() {
-                    int result = JOptionPane.showConfirmDialog(null, "Play Again?", null,
-                            JOptionPane.YES_NO_OPTION);
-                    if (result == JOptionPane.YES_OPTION) {
-                        resetGame();
-                    }
-                }
-            });
-            t.start();
-
         } else {
             trailingRed.start();
-            Thread t = null;
-
-            t = new Thread(new Runnable() {
-
-                @Override
-                public void run() {
-                    int result = JOptionPane.showConfirmDialog(null, "Play Again?", null,
-                            JOptionPane.YES_NO_OPTION);
-                    if (result == JOptionPane.YES_OPTION) {
-                        resetGame();
-                    }
-                }
-            });
-            t.start();
         }
 
         BlackClock.stop();
